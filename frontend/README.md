@@ -1,92 +1,78 @@
-# Frontend Application
+# Frontend
 
-React + Vite frontend with PKCE OAuth2 authentication flow.
+React + Vite frontend with PKCE OAuth2 flow against Sentinel.
 
 ## Prerequisites
 
 - Node.js 18+
 
-## Environment
+## Environment Variables
 
-The application expects the following services:
+Create `frontend/.env`:
 
-- **Backend API**: `http://localhost:3001`
-- **Auth Server**: `http://localhost:4000`
+```env
+VITE_AUTH_SERVER_URL=http://localhost:4000
+VITE_REDIRECT_URI=http://localhost:3000/callback
+VITE_CLIENT_ID=test-client
+VITE_API_BASE_URL=http://localhost:3001/api
+```
 
-OAuth Configuration:
-- `client_id`: `my-app`
-- `redirect_uri`: `http://localhost:3000/callback`
-
-## Installation
+## Setup
 
 ```bash
 npm install
-```
-
-## Development
-
-```bash
 npm run dev
 ```
 
-Application runs on `http://localhost:3000`
+App runs on `http://localhost:3000`.
 
 ## OAuth Flow
 
-### PKCE Authorization Code Flow
+### 1. Login (`/login`)
 
-1. **Login** (`/login`)
-   - Generates `code_verifier` and `code_challenge` using Web Crypto API
-   - Generates `state` parameter for CSRF protection
-   - Saves `pkce_verifier` and `oauth_state` to localStorage
-   - Redirects to auth server: `http://localhost:4000/oauth/authorize`
+- Generates `code_verifier` (32 random bytes, base64url)
+- Computes `code_challenge = BASE64URL(SHA256(verifier))`
+- Generates `state` for CSRF protection
+- Saves `pkce_verifier` and `oauth_state` to `sessionStorage`
+- Redirects to Sentinel's `/oauth/authorize`
 
-2. **Callback** (`/callback`)
-   - Receives authorization `code` from auth server
-   - Retrieves `pkce_verifier` from localStorage
-   - Exchanges code for access token at `http://localhost:4000/oauth/token`
-   - Saves `access_token` to localStorage
-   - Redirects to home page
+### 2. Callback (`/callback`)
 
-3. **Protected Routes** (`/`)
-   - Checks for `access_token` in localStorage
-   - Redirects to `/login` if not authenticated
+- Verifies `state` from URL matches `sessionStorage` (CSRF check)
+- POSTs to `/oauth/token` with `code` + `code_verifier`
+- Stores `access_token` and `refresh_token` in localStorage
+- Clears PKCE/state from sessionStorage
+- Redirects to `/`
 
-## API Authentication
+### 3. Token Refresh
 
-All API requests include the Bearer token automatically via axios interceptors:
+On 401 from the backend, the axios interceptor:
+1. POSTs to `/oauth/token` with `grant_type=refresh_token`
+2. Stores the new `access_token` (and `refresh_token` if rotated)
+3. Retries the original request
+4. If refresh fails, clears tokens and redirects to `/login`
 
-```
-Authorization: Bearer <access_token>
-```
+## Token Details
 
-On 401 response, the user is automatically logged out and redirected to `/login`.
+| Field | Value |
+|-------|-------|
+| expires_in | 900s (15 min) |
+| refresh_token | stored in localStorage |
 
 ## Routes
 
-- `/login` - OAuth login initiation
-- `/callback` - OAuth callback handler
-- `/` - Product Manager (protected)
-
-## Features
-
-### Product Manager
-
-- View all products in a table
-- Add random products
-- Edit product names
-- Delete products
-- Logout
+- `/login` — initiates OAuth flow
+- `/callback` — handles Sentinel redirect
+- `/` — Product Manager (protected)
 
 ## Scripts
 
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run preview` - Preview production build
+| Script | Description |
+|--------|-------------|
+| `npm run dev` | Start development server |
+| `npm run build` | Build for production |
+| `npm run preview` | Preview production build |
 
-## Security
+## Dev Caveat
 
-- **PKCE Flow**: Uses Proof Key for Code Exchange (RFC 7636)
-- **State Parameter**: CSRF protection via random state string
-- **Token Storage**: Access tokens stored in localStorage
-- **Auto Logout**: 401 responses trigger automatic logout
+Every Sentinel restart generates a new RSA key pair, invalidating existing JWTs. Re-login after restarting Sentinel.

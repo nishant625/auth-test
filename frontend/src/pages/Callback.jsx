@@ -56,6 +56,9 @@ function Callback() {
       const tokenData = await tokenResponse.json();
 
       localStorage.setItem('access_token', tokenData.access_token);
+      if (tokenData.refresh_token) {
+        localStorage.setItem('refresh_token', tokenData.refresh_token);
+      }
 
       // Clean up PKCE/state from sessionStorage
       sessionStorage.removeItem('pkce_verifier');
