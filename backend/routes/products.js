@@ -1,12 +1,10 @@
 const express = require('express');
 const { PrismaClient } = require('@prisma/client');
-const authMiddleware = require('../middleware/auth');
 
 const router = express.Router();
 const prisma = new PrismaClient();
 
-// GET all products
-router.get('/api/products', authMiddleware, async (req, res, next) => {
+router.get('/api/products', async (req, res, next) => {
   try {
     const products = await prisma.product.findMany();
     res.json(products);
@@ -16,7 +14,7 @@ router.get('/api/products', authMiddleware, async (req, res, next) => {
 });
 
 // GET single product
-router.get('/api/products/:id', authMiddleware, async (req, res, next) => {
+router.get('/api/products/:id', async (req, res, next) => {
   try {
     const product = await prisma.product.findUnique({
       where: { id: parseInt(req.params.id) }
@@ -31,7 +29,7 @@ router.get('/api/products/:id', authMiddleware, async (req, res, next) => {
 });
 
 // POST create product
-router.post('/api/products', authMiddleware, async (req, res, next) => {
+router.post('/api/products', async (req, res, next) => {
   try {
     const { name, price, stock } = req.body;
     const product = await prisma.product.create({
@@ -44,7 +42,7 @@ router.post('/api/products', authMiddleware, async (req, res, next) => {
 });
 
 // PUT update product
-router.put('/api/products/:id', authMiddleware, async (req, res, next) => {
+router.put('/api/products/:id', async (req, res, next) => {
   try {
     const { name, price, stock } = req.body;
     const data = {};
@@ -63,7 +61,7 @@ router.put('/api/products/:id', authMiddleware, async (req, res, next) => {
 });
 
 // DELETE product
-router.delete('/api/products/:id', authMiddleware, async (req, res, next) => {
+router.delete('/api/products/:id', async (req, res, next) => {
   try {
     await prisma.product.delete({
       where: { id: parseInt(req.params.id) }

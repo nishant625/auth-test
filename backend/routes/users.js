@@ -1,12 +1,11 @@
 const express = require('express');
 const { PrismaClient } = require('@prisma/client');
-const authMiddleware = require('../middleware/auth');
 
 const router = express.Router();
 const prisma = new PrismaClient();
 
 // GET all users
-router.get('/api/users', authMiddleware, async (req, res, next) => {
+router.get('/api/users', async (req, res, next) => {
   try {
     const users = await prisma.user.findMany();
     res.json(users);
@@ -16,7 +15,7 @@ router.get('/api/users', authMiddleware, async (req, res, next) => {
 });
 
 // GET single user
-router.get('/api/users/:id', authMiddleware, async (req, res, next) => {
+router.get('/api/users/:id', async (req, res, next) => {
   try {
     const user = await prisma.user.findUnique({
       where: { id: parseInt(req.params.id) }
@@ -31,7 +30,7 @@ router.get('/api/users/:id', authMiddleware, async (req, res, next) => {
 });
 
 // POST create user
-router.post('/api/users', authMiddleware, async (req, res, next) => {
+router.post('/api/users', async (req, res, next) => {
   try {
     const { name, email } = req.body;
     const user = await prisma.user.create({
@@ -44,7 +43,7 @@ router.post('/api/users', authMiddleware, async (req, res, next) => {
 });
 
 // PUT update user
-router.put('/api/users/:id', authMiddleware, async (req, res, next) => {
+router.put('/api/users/:id', async (req, res, next) => {
   try {
     const { name, email } = req.body;
     const user = await prisma.user.update({
@@ -58,7 +57,7 @@ router.put('/api/users/:id', authMiddleware, async (req, res, next) => {
 });
 
 // DELETE user
-router.delete('/api/users/:id', authMiddleware, async (req, res, next) => {
+router.delete('/api/users/:id', async (req, res, next) => {
   try {
     await prisma.user.delete({
       where: { id: parseInt(req.params.id) }
