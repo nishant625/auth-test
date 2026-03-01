@@ -32,20 +32,20 @@ function Login() {
     const codeChallenge = base64UrlEncode(hashed);
     const state = generateRandomString(16);
 
-    localStorage.setItem('pkce_verifier', codeVerifier);
-    localStorage.setItem('oauth_state', state);
+    sessionStorage.setItem('pkce_verifier', codeVerifier);
+    sessionStorage.setItem('oauth_state', state);
 
     const params = new URLSearchParams({
       response_type: 'code',
-      client_id: 'my-app',
-      redirect_uri: 'http://localhost:3000/callback',
+      client_id: import.meta.env.VITE_CLIENT_ID,
+      redirect_uri: import.meta.env.VITE_REDIRECT_URI,
       code_challenge: codeChallenge,
       code_challenge_method: 'S256',
-      scope: 'read write',
+      scope: 'openid',
       state: state
     });
 
-    const authUrl = `http://localhost:4000/oauth/authorize?${params.toString()}`;
+    const authUrl = `${import.meta.env.VITE_AUTH_SERVER_URL}/oauth/authorize?${params.toString()}`;
     window.location.href = authUrl;
   };
 

@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const usersRoutes = require('./routes/users');
@@ -6,10 +7,10 @@ const ordersRoutes = require('./routes/orders');
 const introspectRoutes = require('./routes/introspect');
 
 const app = express();
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 
 app.use(express.json());
-app.use(cors({ origin: 'http://localhost:3000' }));
+app.use(cors({ origin: process.env.FRONTEND_URL || 'http://localhost:3000' }));
 
 app.use(usersRoutes);
 app.use(productsRoutes);
