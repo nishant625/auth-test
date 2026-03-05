@@ -1,53 +1,12 @@
 import { useEffect } from 'react';
+import { useAuth } from '@nishant625/auth-react';
 
 function Login() {
+  const { login } = useAuth();
+
   useEffect(() => {
-    initiateOAuthFlow();
+    login();
   }, []);
-
-  const generateRandomString = (length) => {
-    const array = new Uint8Array(length);
-    window.crypto.getRandomValues(array);
-    return base64UrlEncode(array);
-  };
-
-  const base64UrlEncode = (buffer) => {
-    const base64 = btoa(String.fromCharCode(...buffer));
-    return base64
-      .replace(/\+/g, '-')
-      .replace(/\//g, '_')
-      .replace(/=+$/, '');
-  };
-
-  const sha256 = async (plain) => {
-    const encoder = new TextEncoder();
-    const data = encoder.encode(plain);
-    const hash = await window.crypto.subtle.digest('SHA-256', data);
-    return new Uint8Array(hash);
-  };
-
-  const initiateOAuthFlow = async () => {
-    const codeVerifier = generateRandomString(32);
-    const hashed = await sha256(codeVerifier);
-    const codeChallenge = base64UrlEncode(hashed);
-    const state = generateRandomString(16);
-
-    sessionStorage.setItem('pkce_verifier', codeVerifier);
-    sessionStorage.setItem('oauth_state', state);
-
-    const params = new URLSearchParams({
-      response_type: 'code',
-      client_id: import.meta.env.VITE_CLIENT_ID,
-      redirect_uri: import.meta.env.VITE_REDIRECT_URI,
-      code_challenge: codeChallenge,
-      code_challenge_method: 'S256',
-      scope: 'openid',
-      state: state
-    });
-
-    const authUrl = `${import.meta.env.VITE_AUTH_SERVER_URL}/oauth/authorize?${params.toString()}`;
-    window.location.href = authUrl;
-  };
 
   return (
     <div style={{ padding: '20px', textAlign: 'center' }}>

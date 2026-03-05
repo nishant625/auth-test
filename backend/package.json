@@ -14,6 +14,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@nishant625/auth-node": "^0.1.0",
     "@prisma/client": "^6.19.2",
     "cors": "^2.8.5",
     "dotenv": "^17.3.1",

@@ -1,23 +1,22 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
+import { useAuth } from '@nishant625/auth-react';
 import Login from './pages/Login';
-import Callback from './pages/Callback';
 import ProductManager from './pages/ProductManager';
 
 function App() {
-  // Check if user is authenticated
-  const isAuthenticated = () => {
-    return !!localStorage.getItem('access_token');
-  };
+  const { isAuthenticated, isLoading,user } = useAuth();
+  console.log("user",user)
 
-  // Protected route wrapper
+  if (isLoading) return null;
+
   const ProtectedRoute = ({ children }) => {
-    return isAuthenticated() ? children : <Navigate to="/login" replace />;
+    return isAuthenticated ? children : <Navigate to="/login" replace />;
   };
 
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
-      <Route path="/callback" element={<Callback />} />
+      <Route path="/callback" element={<Navigate to="/" replace />} />
       <Route
         path="/"
         element={

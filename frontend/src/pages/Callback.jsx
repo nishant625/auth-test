@@ -44,6 +44,7 @@ function Callback() {
           redirect_uri: import.meta.env.VITE_REDIRECT_URI,
           client_id: import.meta.env.VITE_CLIENT_ID,
           code_verifier: codeVerifier,
+          client_secret: import.meta.env.VITE_CLIENT_SECRET
         }).toString(),
       });
 
